@@ -1,0 +1,140 @@
+[project]
+name = "compare-relighting"
+version = "0.1.0"
+description = "Unified runners and benchmark notes for relighting comparisons"
+readme = "README.md"
+requires-python = ">=3.9,<3.10"
+dependencies = [
+    "tomli>=2.0.1; python_version < '3.11'",
+]
+
+[project.optional-dependencies]
+rgbx = [
+    "accelerate>=0.30.0",
+    "diffusers==0.20.0",
+    "gradio==3.48.0",
+    "huggingface-hub==0.25.0",
+    "imageio==2.34.1",
+    "numpy==1.26.4",
+    "opencv-python==4.9.0.80",
+    "pillow>=10.3.0",
+    "torch==2.8.0",
+    "torchaudio==2.8.0",
+    "torchvision==0.23.0",
+    "transformers==4.40.2",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu128" }
+torchvision = { index = "pytorch-cu128" }
+torchaudio = { index = "pytorch-cu128" }
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.compare.methods."rgbx-rgb2x"]
+title = "RGBX RGB->X demo"
+extra = "rgbx"
+cwd = "rgbx/rgb2x"
+entry = "gradio_demo_rgb2x.py"
+paper = "https://zheng95z.github.io/publications/rgbx24"
+code = "https://github.com/zheng95z/rgbx"
+default_args = []
+
+[tool.compare.methods."rgbx-rgb2x-batch"]
+title = "RGBX RGB->X batch"
+extra = "rgbx"
+cwd = "."
+entry = "rgbx_rgb2x_batch.py"
+paper = "https://zheng95z.github.io/publications/rgbx24"
+code = "https://github.com/zheng95z/rgbx"
+default_args = []
+
+[tool.compare.methods."rgbx-x2rgb"]
+title = "RGBX X->RGB demo"
+extra = "rgbx"
+cwd = "rgbx/x2rgb"
+entry = "gradio_demo_x2rgb.py"
+paper = "https://zheng95z.github.io/publications/rgbx24"
+code = "https://github.com/zheng95z/rgbx"
+default_args = []
+
+[tool.compare.methods."luminet-demo"]
+title = "LumiNet Gradio demo"
+extra = "local-venv"
+python = "luminet/.venv/Scripts/python.exe"
+cwd = "luminet"
+entry = "gradio_demo.py"
+paper = "https://arxiv.org/abs/2412.00177"
+code = "https://github.com/xyxingx/LumiNet"
+default_args = []
+
+[tool.compare.methods."luminet-relit"]
+title = "LumiNet local relit script"
+extra = "local-venv"
+python = "luminet/.venv/Scripts/python.exe"
+cwd = "luminet"
+entry = "relit_inference.py"
+paper = "https://arxiv.org/abs/2412.00177"
+code = "https://github.com/xyxingx/LumiNet"
+default_args = []
+
+[tool.compare.methods."ic-light"]
+title = "IC-Light text-conditioned demo"
+extra = "local-venv"
+python = "ic-light/.venv/Scripts/python.exe"
+cwd = "ic-light"
+entry = "gradio_demo.py"
+paper = "https://github.com/lllyasviel/IC-Light"
+code = "https://github.com/lllyasviel/IC-Light"
+default_args = []
+
+[tool.compare.methods."ic-light-bg"]
+title = "IC-Light background-conditioned demo"
+extra = "local-venv"
+python = "ic-light/.venv/Scripts/python.exe"
+cwd = "ic-light"
+entry = "gradio_demo_bg.py"
+paper = "https://github.com/lllyasviel/IC-Light"
+code = "https://github.com/lllyasviel/IC-Light"
+default_args = []
+
+[tool.compare.benchmark]
+dataset = "MIIW"
+split = "300 real paired samples"
+path = "miiw_quantitative"
+manifest = "miiw_quantitative/manifest.jsonl"
+prediction_root = "miiw_quantitative/predictions"
+scoring_resolution = [256, 256]
+baseline_input_resolution = [512, 512]
+original_resolution = [1500, 1000]
+metrics = ["RMSE", "PSNR", "SSIM", "LPIPS", "Runtime"]
+
+[[tool.compare.benchmark.methods]]
+name = "luminet"
+title = "LumiNet"
+status = "repo present"
+output_dir = "miiw_quantitative/predictions/luminet"
+
+[[tool.compare.benchmark.methods]]
+name = "ic-light"
+title = "IC-Light"
+status = "repo/env/weights ready"
+output_dir = "miiw_quantitative/predictions/ic-light"
+
+[[tool.compare.benchmark.methods]]
+name = "rgbx"
+title = "RGB<->X"
+status = "present"
+output_dir = "miiw_quantitative/predictions/rgbx"
+
+[[tool.compare.benchmark.methods]]
+name = "ours-best"
+title = "Ours best"
+status = "awaiting predictions"
+output_dir = "miiw_quantitative/predictions/ours-best"

@@ -1,0 +1,150 @@
+# OS / editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Local agent metadata
+.agents/
+.codex/
+.codex_tmp/
+
+# Python caches and build artefacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+.coverage.*
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Local Python / uv environments
+.venv*/
+venv/
+env/
+ENV/
+.uv/
+.uv-cache/
+.uv-python/
+.python-version
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.secret
+*.secrets
+*.local
+*.local.*
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+tempCodeRunnerFile.py
+
+# Git metadata from nested upstream repositories
+**/.git/
+**/.git.nested-backup/
+
+# Model weights, checkpoints, and archives
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+*.bin
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.tar.bz2
+
+# Generated datasets, caches, renders, and experiment outputs
+/downloaded_data/
+/oringinal/
+/result/
+/result.zip
+/test.jsonl
+**/.cache/
+**/hf_cache/
+**/asset/input/
+**/asset/output/
+**/asset/pointcloud/
+**/asset/mesh/
+**/asset/materials/
+**/asset/background/
+**/asset/_mvi_batch_tmp/
+**/asset/_mvi_single_image_list.txt
+**/asset/_ppd_image_list.txt
+**/asset/moge_raw/
+**/data/
+**/datasets/
+**/output/
+**/outputs/
+**/runs/
+**/work/
+**/checkpoints/
+**/predictions/
+**/samples/
+**/manifest*.jsonl
+**/external.zip
+
+# Benchmark datasets and generated evaluation artefacts
+compare/**/assets/
+compare/**/stage4_requests/
+compare/**/stage4_artifacts/
+compare/**/_mvinverse_inputs/
+compare/**/_mvinverse_outputs/
+compare/**/_mvi_smoke/
+compare/**/logs/
+compare/**/hf_files/
+compare/**/diagnostics/*.png
+compare/**/diagnostics/*.jpg
+compare/**/results/**/*.png
+compare/**/results/**/*.jpg
+compare/**/results/**/*.jpeg
+compare/**/results/**/*.csv
+compare/**/results/**/*.json
+compare/**/results*/**/*.png
+compare/**/results*/**/*.jpg
+compare/**/results*/**/*.jpeg
+compare/**/results*/**/*.csv
+compare/**/results*/**/*.json
+compare/**/probe_report.json
+
+# Upstream sample datasets copied into local workspaces
+Stage1_ver1/MVinverse/examples/
+compare/rgbx/assets/
+
+# Common renderer / geometry artefacts generated from local inputs
+*.exr
+*.ply
+
+# Local request files often contain absolute paths or private checkpoints
+/Stage4/relight_request*.json
+/Stage4/input/
+Stage4/external/Stage12_remote_run/render_optimized_Nero_AI_Image_Denoiser_100.png
+
+# Local notes and generated evaluation reports
+/DEMO_README.md
+/note.txt
+/compare/own_test_quantitative/results/

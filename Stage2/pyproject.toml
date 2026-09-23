@@ -1,0 +1,33 @@
+[project]
+name = "stage2"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "diffusers==0.33.1",
+    "imageio>=2.37.3",
+    "matplotlib>=3.10.8",
+    "mitsuba>=3.8.0",
+    "numpy>=2.2.6",
+    "open3d>=0.19.0",
+    "opencv-python>=4.13.0.92",
+    "peft==0.15.2",
+    "pillow>=12.1.1",
+    "protobuf==3.19.0",
+    "sentencepiece>=0.2.1",
+    "torch>=2.7.0",
+    "torchvision>=0.22.0",
+    "tqdm>=4.67.3",
+    "transformers==4.44.2",
+    "trimesh>=4.12.1",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu128" }
+torchvision = { index = "pytorch-cu128" }

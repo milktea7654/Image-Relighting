@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stage4 Light Tuner</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101315;
+      --panel: #181d20;
+      --panel-2: #20262a;
+      --text: #edf2f3;
+      --muted: #9ba8ad;
+      --line: #344047;
+      --accent: #6fd3b6;
+      --accent-2: #f0bd61;
+      --danger: #ee8376;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.35 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      min-height: 100vh;
+    }
+
+    .stage {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      min-width: 0;
+      background: #0b0d0e;
+    }
+
+    .topbar, .footer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+    }
+
+    .footer {
+      border-top: 1px solid var(--line);
+      border-bottom: 0;
+      justify-content: space-between;
+      min-height: 38px;
+    }
+
+    .scene-name {
+      color: var(--text);
+      font-weight: 650;
+    }
+
+    .viewport {
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      min-height: 0;
+    }
+
+    canvas {
+      max-width: 100%;
+      max-height: 100%;
+      image-rendering: auto;
+      background: #050606;
+      cursor: crosshair;
+    }
+
+    .target {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--accent-2);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      box-shadow: 0 0 0 1px #000, 0 0 18px rgba(240, 189, 97, 0.75);
+    }
+
+    .axis-gizmo {
+      position: absolute;
+      width: 116px;
+      height: 88px;
+      transform: translate(-14px, -74px);
+      pointer-events: none;
+      filter: drop-shadow(0 1px 1px #000);
+    }
+
+    .axis {
+      position: absolute;
+      left: 14px;
+      bottom: 14px;
+      width: 52px;
+      height: 3px;
+      transform-origin: 0 50%;
+      border-radius: 999px;
+    }
+
+    .axis::after {
+      content: "";
+      position: absolute;
+      right: -1px;
+      top: 50%;
+      width: 9px;
+      height: 9px;
+      border-top: 3px solid currentColor;
+      border-right: 3px solid currentColor;
+      transform: translateY(-50%) rotate(45deg);
+    }
+
+    .axis span {
+      position: absolute;
+      right: -22px;
+      top: -9px;
+      font: 700 12px/1 Consolas, "Cascadia Mono", monospace;
+    }
+
+    .axis-x {
+      color: #ff6b63;
+      background: #ff6b63;
+      transform: rotate(0deg);
+    }
+
+    .axis-y {
+      color: #70d777;
+      background: #70d777;
+      transform: rotate(-90deg);
+    }
+
+    .axis-z {
+      color: #6ca8ff;
+      background: #6ca8ff;
+      width: 42px;
+      transform: rotate(132deg);
+    }
+
+    .depth-arrow {
+      position: absolute;
+      display: grid;
+      grid-template-columns: 18px auto;
+      align-items: center;
+      gap: 7px;
+      min-width: 92px;
+      height: 58px;
+      transform: translate(16px, -50%);
+      color: var(--accent-2);
+      cursor: ns-resize;
+      user-select: none;
+      touch-action: none;
+      filter: drop-shadow(0 1px 1px #000);
+    }
+
+    .depth-arrow .shaft {
+      position: relative;
+      width: 2px;
+      height: 48px;
+      margin-left: 8px;
+      background: var(--accent-2);
+    }
+
+    .depth-arrow .shaft::before,
+    .depth-arrow .shaft::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      width: 10px;
+      height: 10px;
+      border-left: 2px solid var(--accent-2);
+      border-top: 2px solid var(--accent-2);
+    }
+
+    .depth-arrow .shaft::before {
+      top: -1px;
+      transform: translateX(-50%) rotate(45deg);
+    }
+
+    .depth-arrow .shaft::after {
+      bottom: -1px;
+      transform: translateX(-50%) rotate(225deg);
+    }
+
+    .depth-arrow .label {
+      padding: 3px 6px;
+      color: #ffe5ad;
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(240, 189, 97, 0.55);
+      border-radius: 6px;
+      font: 12px/1.2 Consolas, "Cascadia Mono", monospace;
+      white-space: nowrap;
+    }
+
+    aside {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      border-left: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .controls {
+      overflow: auto;
+      padding: 14px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 17px;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 20px 0 10px;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    label {
+      display: grid;
+      grid-template-columns: 92px minmax(0, 1fr) 54px;
+      align-items: center;
+      gap: 10px;
+      margin: 9px 0;
+      color: var(--muted);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    input[type="number"] {
+      width: 54px;
+      padding: 5px 6px;
+      color: var(--text);
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    button {
+      min-height: 32px;
+      padding: 0 10px;
+      color: var(--text);
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover { border-color: var(--accent); }
+    button.primary { background: #1f3a35; border-color: #337b69; }
+
+    textarea {
+      width: 100%;
+      min-height: 184px;
+      resize: vertical;
+      color: var(--text);
+      background: #0c0f10;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px;
+      font: 12px/1.4 Consolas, "Cascadia Mono", monospace;
+    }
+
+    .status {
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .error { color: var(--danger); }
+
+    @media (max-width: 900px) {
+      .app { grid-template-columns: 1fr; grid-template-rows: minmax(420px, 1fr) auto; }
+      aside { border-left: 0; border-top: 1px solid var(--line); }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="stage">
+      <div class="topbar">
+        <span class="scene-name" id="sceneLabel">demo_scene</span>
+        <span id="assetStatus" class="status">loading buffers</span>
+      </div>
+      <div class="viewport" id="viewport">
+        <canvas id="canvas" width="1024" height="768"></canvas>
+        <div id="target" class="target"></div>
+        <div id="axisGizmo" class="axis-gizmo" aria-hidden="true">
+          <div class="axis axis-x"><span>X</span></div>
+          <div class="axis axis-y"><span>Y</span></div>
+          <div class="axis axis-z"><span>Z</span></div>
+        </div>
+        <div id="depthArrow" class="depth-arrow" title="Drag vertically to adjust depth">
+          <div class="shaft"></div>
+          <div id="depthLabel" class="label">z -1.20</div>
+        </div>
+      </div>
+      <div class="footer">
+        <span id="pixelStatus" class="status">drag on the image to move the light target</span>
+        <button id="savePng">Save PNG</button>
+      </div>
+    </section>
+
+    <aside>
+      <div class="controls">
+        <h1>Stage4 Light Tuner</h1>
+
+        <h2>View</h2>
+        <div class="row">
+          <button id="viewRelit" class="primary">Relit</button>
+          <button id="viewAlbedo">Albedo</button>
+          <button id="viewNormal">Normal</button>
+          <button id="viewReference">Reference</button>
+        </div>
+
+        <h2>Environment</h2>
+        <label>Env R <input id="envR" type="range" min="0" max="2" step="0.01" value="0.20"><input data-for="envR" type="number" step="0.01"></label>
+        <label>Env G <input id="envG" type="range" min="0" max="2" step="0.01" value="0.20"><input data-for="envG" type="number" step="0.01"></label>
+        <label>Env B <input id="envB" type="range" min="0" max="2" step="0.01" value="0.20"><input data-for="envB" type="number" step="0.01"></label>
+
+        <h2>Point Light</h2>
+        <label>X <input id="lightX" type="range" min="-6" max="6" step="0.01" value="0.00"><input data-for="lightX" type="number" step="0.01"></label>
+        <label>Y <input id="lightY" type="range" min="-5" max="5" step="0.01" value="0.65"><input data-for="lightY" type="number" step="0.01"></label>
+        <label>Depth +/- <input id="lightZ" type="range" min="-1" max="1" step="0.01" value="0"><input data-for="lightZ" type="number" step="0.01"></label>
+        <label>Red <input id="pointR" type="range" min="0" max="120" step="0.5" value="35"><input data-for="pointR" type="number" step="0.5"></label>
+        <label>Green <input id="pointG" type="range" min="0" max="120" step="0.5" value="32"><input data-for="pointG" type="number" step="0.5"></label>
+        <label>Blue <input id="pointB" type="range" min="0" max="120" step="0.5" value="26"><input data-for="pointB" type="number" step="0.5"></label>
+        <label>Spread <input id="falloff" type="range" min="0.3" max="6" step="0.05" value="2.2"><input data-for="falloff" type="number" step="0.05"></label>
+        <label>Gloss <input id="gloss" type="range" min="0" max="1" step="0.01" value="0.25"><input data-for="gloss" type="number" step="0.01"></label>
+
+        <h2>Request Values</h2>
+        <textarea id="requestOut" spellcheck="false"></textarea>
+        <div class="row">
+          <button id="copyJson" class="primary">Copy JSON</button>
+          <button id="reset">Reset</button>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const scene = params.get("scene") || "demo_scene";
+    const root = params.get("root") || `/external/Stage12_remote_run/output/${scene}`;
+    const outputName = params.get("output") || `${scene}_point`;
+
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    const target = document.getElementById("target");
+    const axisGizmo = document.getElementById("axisGizmo");
+    const depthArrow = document.getElementById("depthArrow");
+    const depthLabel = document.getElementById("depthLabel");
+    const viewport = document.getElementById("viewport");
+    const assetStatus = document.getElementById("assetStatus");
+    const pixelStatus = document.getElementById("pixelStatus");
+    document.getElementById("sceneLabel").textContent = scene;
+
+    const ids = ["envR", "envG", "envB", "lightX", "lightY", "lightZ", "pointR", "pointG", "pointB", "falloff", "gloss"];
+    const controls = Object.fromEntries(ids.map((id) => [id, document.getElementById(id)]));
+    const values = Object.fromEntries(ids.map((id) => [id, Number(controls[id].value)]));
+    values.lightZ = 1.2;
+    const numberInputs = [...document.querySelectorAll("input[type='number'][data-for]")];
+    let view = "relit";
+    let buffers = {};
+    let camera = null;
+    let imageData = null;
+    let raf = 0;
+
+    function value(id) {
+      return Number(values[id]);
+    }
+
+    function clampToSlider(id, raw) {
+      const slider = controls[id];
+      const min = Number(slider.min);
+      const max = Number(slider.max);
+      return Math.max(min, Math.min(max, Number(raw)));
+    }
+
+    function setValue(id, raw, updateSlider = true) {
+      const n = Number(raw);
+      if (!Number.isFinite(n)) return;
+      values[id] = n;
+      if (updateSlider) {
+        controls[id].value = id === "lightZ" ? "0" : String(clampToSlider(id, n));
+      }
+    }
+
+    function syncNumbers() {
+      for (const input of numberInputs) {
+        input.value = String(values[input.dataset.for]);
+      }
+    }
+
+    function loadImage(path) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error(path));
+        img.src = `${path}?t=${Date.now()}`;
+      });
+    }
+
+    function imagePixels(img) {
+      const c = document.createElement("canvas");
+      c.width = img.naturalWidth;
+      c.height = img.naturalHeight;
+      const x = c.getContext("2d", { willReadFrequently: true });
+      x.drawImage(img, 0, 0);
+      return x.getImageData(0, 0, c.width, c.height);
+    }
+
+    async function loadJson(path) {
+      const res = await fetch(`${path}?t=${Date.now()}`, { cache: "no-store" });
+      if (!res.ok) throw new Error(path);
+      return res.json();
+    }
+
+    async function loadBuffers() {
+      const [albedo, normal, roughness, metallic, reference, cam] = await Promise.all([
+        loadImage(`${root}/albedo.png`),
+        loadImage(`${root}/normal.png`),
+        loadImage(`${root}/roughness.png`).catch(() => null),
+        loadImage(`${root}/metallic.png`).catch(() => null),
+        loadImage(`${root}/reference.png`).catch(() => null),
+        loadJson(`${root}/camera.json`).catch(() => null),
+      ]);
+
+      canvas.width = albedo.naturalWidth;
+      canvas.height = albedo.naturalHeight;
+      camera = normalizeCamera(cam, canvas.width, canvas.height);
+      imageData = ctx.createImageData(canvas.width, canvas.height);
+      buffers.albedo = imagePixels(albedo);
+      buffers.normal = imagePixels(normal);
+      buffers.roughness = roughness ? imagePixels(roughness) : null;
+      buffers.metallic = metallic ? imagePixels(metallic) : null;
+      buffers.reference = reference ? imagePixels(reference) : null;
+      assetStatus.textContent = `${canvas.width} x ${canvas.height}`;
+      draw();
+    }
+
+    function normalizeCamera(cam, width, height) {
+      const fallbackFx = width;
+      const fallbackFy = width;
+      const k = cam && cam.intrinsic ? cam.intrinsic : [[fallbackFx, 0, width / 2], [0, fallbackFy, height / 2], [0, 0, 1]];
+      return {
+        width: Number(cam?.resize_W || cam?.width || width),
+        height: Number(cam?.resize_H || cam?.height || height),
+        fx: Number(k[0][0]),
+        fy: Number(k[1][1]),
+        cx: Number(k[0][2]),
+        cy: Number(k[1][2]),
+      };
+    }
+
+    function mitsubaPoint() {
+      return {
+        x: value("lightX"),
+        y: value("lightY"),
+        z: -value("lightZ"),
+        depth: value("lightZ"),
+      };
+    }
+
+    function projectMitsubaPoint() {
+      const cam = camera || normalizeCamera(null, canvas.width, canvas.height);
+      const p = mitsubaPoint();
+      const depth = Math.max(0.001, -p.z);
+      const u = (p.x * cam.fx / depth + cam.cx) / cam.width;
+      const v = (-p.y * cam.fy / depth + cam.cy) / cam.height;
+      return { u, v };
+    }
+
+    function unprojectMitsubaPoint(u, v, depth) {
+      const cam = camera || normalizeCamera(null, canvas.width, canvas.height);
+      const px = u * cam.width;
+      const py = v * cam.height;
+      return {
+        x: (px - cam.cx) * depth / cam.fx,
+        y: -(py - cam.cy) * depth / cam.fy,
+        z: -depth,
+      };
+    }
+
+    function drawTarget() {
+      const rect = canvas.getBoundingClientRect();
+      const p = projectMitsubaPoint();
+      target.style.left = `${rect.left - viewport.getBoundingClientRect().left + p.u * rect.width}px`;
+      target.style.top = `${rect.top - viewport.getBoundingClientRect().top + p.v * rect.height}px`;
+      axisGizmo.style.left = `${rect.left - viewport.getBoundingClientRect().left + p.u * rect.width}px`;
+      axisGizmo.style.top = `${rect.top - viewport.getBoundingClientRect().top + p.v * rect.height}px`;
+      depthArrow.style.left = `${rect.left - viewport.getBoundingClientRect().left + p.u * rect.width}px`;
+      depthArrow.style.top = `${rect.top - viewport.getBoundingClientRect().top + p.v * rect.height}px`;
+      depthLabel.textContent = `z ${(-value("lightZ")).toFixed(2)}`;
+    }
+
+    function requestDraw() {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(draw);
+    }
+
+    function draw() {
+      if (!buffers.albedo || !buffers.normal) return;
+      drawTarget();
+
+      if (view === "albedo") {
+        ctx.putImageData(buffers.albedo, 0, 0);
+        return;
+      }
+      if (view === "normal") {
+        ctx.putImageData(buffers.normal, 0, 0);
+        return;
+      }
+      if (view === "reference" && buffers.reference) {
+        ctx.putImageData(buffers.reference, 0, 0);
+        return;
+      }
+
+      const out = imageData.data;
+      const alb = buffers.albedo.data;
+      const nor = buffers.normal.data;
+      const rough = buffers.roughness ? buffers.roughness.data : null;
+      const w = canvas.width;
+      const h = canvas.height;
+
+      const env = [value("envR"), value("envG"), value("envB")];
+      const pcol = [value("pointR"), value("pointG"), value("pointB")];
+      const light = mitsubaPoint();
+      const lx = light.x;
+      const ly = light.y;
+      const depth = light.depth;
+      const falloff = value("falloff");
+      const gloss = value("gloss");
+
+      for (let y = 0; y < h; y++) {
+        const v = y / Math.max(1, h - 1);
+        for (let x = 0; x < w; x++) {
+          const i = (y * w + x) * 4;
+          const u = x / Math.max(1, w - 1);
+          const surface = unprojectMitsubaPoint(u, v, depth);
+
+          const nx = nor[i] / 127.5 - 1;
+          const ny = 1 - nor[i + 1] / 127.5;
+          const nz = -(nor[i + 2] / 127.5 - 1);
+          const nLen = Math.hypot(nx, ny, nz) || 1;
+          const n0 = nx / nLen;
+          const n1 = ny / nLen;
+          const n2 = nz / nLen;
+
+          const vx = lx - surface.x;
+          const vy = ly - surface.y;
+          const vz = light.z - surface.z;
+          const dist2 = vx * vx + vy * vy + vz * vz;
+          const vLen = Math.sqrt(dist2) || 1;
+          const l0 = vx / vLen;
+          const l1 = vy / vLen;
+          const l2 = vz / vLen;
+          const ndotl = Math.max(0, n0 * l0 + n1 * l1 + n2 * l2);
+          const atten = 1 / (1 + dist2 * falloff);
+          const roughness = rough ? rough[i] / 255 : 0.45;
+          const specPower = 12 + (1 - roughness) * 80;
+          const spec = Math.pow(Math.max(0, n2 + ndotl) * 0.5, specPower) * gloss;
+
+          for (let c = 0; c < 3; c++) {
+            const base = alb[i + c] / 255;
+            const diffuse = env[c] + pcol[c] * 0.035 * ndotl * atten;
+            const lit = base * diffuse + spec * pcol[c] * 0.015 * atten;
+            out[i + c] = Math.max(0, Math.min(255, Math.round(Math.pow(Math.min(3, lit) / 3, 1 / 2.2) * 255)));
+          }
+          out[i + 3] = 255;
+        }
+      }
+      ctx.putImageData(imageData, 0, 0);
+      updateRequest();
+    }
+
+    function updateRequest() {
+      const req = {
+        input_image: "D:\\relighting\\Stage4\\input\\demo_scene.jpg",
+        scene_id: scene,
+        output_name: outputName,
+        light_mode: "env",
+        env_rgb: [value("envR"), value("envG"), value("envB")],
+        point_light_position: [value("lightX"), value("lightY"), -value("lightZ")],
+        point_light_rgb: [value("pointR"), value("pointG"), value("pointB")],
+        spp: 32,
+        final_spp: 128,
+        iters: 80,
+        mesh_stride: 2,
+        device: "cuda",
+        mitsuba_variant: "cuda_ad_rgb"
+      };
+      document.getElementById("requestOut").value = JSON.stringify(req, null, 2);
+    }
+
+    for (const id of ids) {
+      controls[id].addEventListener("input", () => {
+        if (id === "lightZ") {
+          const delta = Number(controls[id].value);
+          if (Number.isFinite(delta) && delta !== 0) {
+            const nextDepth = Math.max(0.01, value("lightZ") + delta * 0.1);
+            setValue("lightZ", nextDepth, false);
+            controls[id].value = "0";
+            pixelStatus.textContent = `depth ${value("lightZ").toFixed(3)} -> z ${(-value("lightZ")).toFixed(3)}`;
+          }
+        } else {
+          setValue(id, controls[id].value, false);
+        }
+        syncNumbers();
+        updateRequest();
+        requestDraw();
+      });
+    }
+
+    for (const input of numberInputs) {
+      input.addEventListener("input", () => {
+        setValue(input.dataset.for, input.value, true);
+        updateRequest();
+        requestDraw();
+      });
+    }
+
+    function setView(next) {
+      view = next;
+      for (const button of ["viewRelit", "viewAlbedo", "viewNormal", "viewReference"]) {
+        document.getElementById(button).classList.toggle("primary", button.toLowerCase().includes(next));
+      }
+      requestDraw();
+    }
+
+    document.getElementById("viewRelit").onclick = () => setView("relit");
+    document.getElementById("viewAlbedo").onclick = () => setView("albedo");
+    document.getElementById("viewNormal").onclick = () => setView("normal");
+    document.getElementById("viewReference").onclick = () => setView("reference");
+    document.getElementById("copyJson").onclick = async () => {
+      await navigator.clipboard.writeText(document.getElementById("requestOut").value);
+      pixelStatus.textContent = "request JSON copied";
+    };
+    document.getElementById("savePng").onclick = () => {
+      const a = document.createElement("a");
+      a.href = canvas.toDataURL("image/png");
+      a.download = `${scene}_light_preview.png`;
+      a.click();
+    };
+    document.getElementById("reset").onclick = () => {
+      const defaults = { envR: 0.2, envG: 0.2, envB: 0.2, lightX: 0, lightY: 0.65, lightZ: 1.2, pointR: 35, pointG: 32, pointB: 26, falloff: 2.2, gloss: 0.25 };
+      for (const [k, v] of Object.entries(defaults)) setValue(k, v, true);
+      syncNumbers();
+      updateRequest();
+      requestDraw();
+    };
+
+    canvas.addEventListener("pointerdown", (event) => {
+      canvas.setPointerCapture(event.pointerId);
+      moveLight(event);
+    });
+    canvas.addEventListener("pointermove", (event) => {
+      if (event.buttons) moveLight(event);
+    });
+
+    function moveLight(event) {
+      const rect = canvas.getBoundingClientRect();
+      const u = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+      const v = Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
+      const p = unprojectMitsubaPoint(u, v, value("lightZ"));
+      setValue("lightX", p.x.toFixed(2), true);
+      setValue("lightY", p.y.toFixed(2), true);
+      pixelStatus.textContent = `x ${value("lightX").toFixed(2)}, y ${value("lightY").toFixed(2)}, z ${(-value("lightZ")).toFixed(2)}`;
+      syncNumbers();
+      updateRequest();
+      requestDraw();
+    }
+
+    let depthDrag = null;
+    depthArrow.addEventListener("pointerdown", (event) => {
+      depthArrow.setPointerCapture(event.pointerId);
+      depthDrag = {
+        y: event.clientY,
+        depth: value("lightZ"),
+      };
+    });
+    depthArrow.addEventListener("pointermove", (event) => {
+      if (!depthDrag) return;
+      const delta = event.clientY - depthDrag.y;
+      const nextDepth = Math.max(0.01, depthDrag.depth * Math.exp(delta * 0.01));
+      setValue("lightZ", nextDepth.toFixed(3), true);
+      pixelStatus.textContent = `depth ${value("lightZ").toFixed(3)} -> z ${(-value("lightZ")).toFixed(3)}`;
+      syncNumbers();
+      updateRequest();
+      requestDraw();
+    });
+    depthArrow.addEventListener("pointerup", () => {
+      depthDrag = null;
+    });
+    depthArrow.addEventListener("pointercancel", () => {
+      depthDrag = null;
+    });
+
+    window.addEventListener("resize", drawTarget);
+    syncNumbers();
+    updateRequest();
+    loadBuffers().catch((err) => {
+      assetStatus.textContent = `missing asset: ${err.message}`;
+      assetStatus.classList.add("error");
+    });
+  </script>
+</body>
+</html>

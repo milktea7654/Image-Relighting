@@ -1,0 +1,16 @@
+{
+  "input_image": "input/room.jpg",
+  "scene_id": "room",
+  "output_name": "room",
+  "stage3_checkpoint": "checkpoints/stage3/checkpoint_final.pt",
+  "light_mode": "env",
+  "env_rgb": [0.2, 0.2, 0.2],
+  "point_light_position": [0.0, 0.0, 0.0],
+  "point_light_rgb": [40.0, 0.0, 0.0],
+  "spp": 32,
+  "final_spp": 128,
+  "iters": 80,
+  "mesh_stride": 2,
+  "device": "cuda",
+  "mitsuba_variant": "cuda_ad_rgb"
+}

@@ -1,0 +1,111 @@
+[submodule "compare/ic-light"]
+	path = compare/ic-light
+	url = https://github.com/lllyasviel/IC-Light.git
+
+[submodule "compare/luminet"]
+	path = compare/luminet
+	url = https://github.com/xyxingx/LumiNet.git
+
+[submodule "compare/sources/DeepIntrinsicRelighting"]
+	path = compare/sources/DeepIntrinsicRelighting
+	url = https://github.com/CVC-Color/DeepIntrinsicRelighting.git
+
+[submodule "compare/sources/VIDIT"]
+	path = compare/sources/VIDIT
+	url = https://github.com/majedelhelou/VIDIT.git
+
+[submodule "Stage1_ver1/pixel-perfect-depth"]
+	path = Stage1_ver1/pixel-perfect-depth
+	url = https://github.com/gangweix/pixel-perfect-depth.git
+
+[submodule "Stage1_ver2/MoGe"]
+	path = Stage1_ver2/MoGe
+	url = https://github.com/microsoft/MoGe.git
+
+[submodule "Stage1_ver2/Ouroboros"]
+	path = Stage1_ver2/Ouroboros
+	url = https://github.com/Y-Research-SBU/Ouroboros
+
+[submodule "Stage3/external/AdaIR"]
+	path = Stage3/external/AdaIR
+	url = https://github.com/c-yn/AdaIR.git
+
+[submodule "Stage3/external/AnyIR"]
+	path = Stage3/external/AnyIR
+	url = https://github.com/Amazingren/AnyIR.git
+
+[submodule "Stage3/external/BioIR"]
+	path = Stage3/external/BioIR
+	url = https://github.com/c-yn/BioIR.git
+
+[submodule "Stage3/external/DarkIR"]
+	path = Stage3/external/DarkIR
+	url = https://github.com/cidautai/DarkIR.git
+
+[submodule "Stage3/external/DCPT"]
+	path = Stage3/external/DCPT
+	url = https://github.com/MILab-PKU/dcpt.git
+
+[submodule "Stage3/external/HAIR"]
+	path = Stage3/external/HAIR
+	url = https://github.com/jin-cao-tma/HAIR.git
+
+[submodule "Stage3/external/HOGformer"]
+	path = Stage3/external/HOGformer
+	url = https://github.com/Fire-friend/HOGformer.git
+
+[submodule "Stage3/external/HVI-CIDNet"]
+	path = Stage3/external/HVI-CIDNet
+	url = https://github.com/Fediory/HVI-CIDNet.git
+
+[submodule "Stage3/external/InstructIR"]
+	path = Stage3/external/InstructIR
+	url = https://github.com/mv-lab/InstructIR.git
+
+[submodule "Stage3/external/MambaIR"]
+	path = Stage3/external/MambaIR
+	url = https://github.com/csguoh/MambaIR.git
+
+[submodule "Stage3/external/MAXIM"]
+	path = Stage3/external/MAXIM
+	url = https://github.com/google-research/maxim.git
+
+[submodule "Stage3/external/MAXIM-PyTorch"]
+	path = Stage3/external/MAXIM-PyTorch
+	url = https://github.com/vztu/maxim-pytorch.git
+
+[submodule "Stage3/external/MOCFormer"]
+	path = Stage3/external/MOCFormer
+	url = https://github.com/mcpaulgeorge/MOCFormer.git
+
+[submodule "Stage3/external/NAFNet"]
+	path = Stage3/external/NAFNet
+	url = https://github.com/megvii-research/NAFNet.git
+
+[submodule "Stage3/external/OneRestore"]
+	path = Stage3/external/OneRestore
+	url = https://github.com/gy65896/OneRestore.git
+
+[submodule "Stage3/external/Perceive-IR"]
+	path = Stage3/external/Perceive-IR
+	url = https://github.com/House-yuyu/Perceive-IR.git
+
+[submodule "Stage3/external/PromptIR"]
+	path = Stage3/external/PromptIR
+	url = https://github.com/va1shn9v/PromptIR.git
+
+[submodule "Stage3/external/Restormer"]
+	path = Stage3/external/Restormer
+	url = https://github.com/swz30/Restormer.git
+
+[submodule "Stage3/external/Retinexformer"]
+	path = Stage3/external/Retinexformer
+	url = https://github.com/caiyuanhao1998/Retinexformer.git
+
+[submodule "Stage3/external/SAIGFormer"]
+	path = Stage3/external/SAIGFormer
+	url = https://github.com/LHTcode/SAIGFormer.git
+
+[submodule "Stage3/external/X-Restormer"]
+	path = Stage3/external/X-Restormer
+	url = https://github.com/Andrew0613/X-Restormer.git
