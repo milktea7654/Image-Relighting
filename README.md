@@ -14,8 +14,8 @@ single RGB image
 
 | Path | Purpose | Main entry point |
 | --- | --- | --- |
-| `Stage1_ver1/` | 舊版 scene reconstruction baseline | `Stage1_ver1/main.py` |
-| `Stage1_ver2/` | 目前主要的 MoGe + Ouroboros scene/material reconstruction | `Stage1_ver2/main.py` |
+| `Stage1_ver1/` | 目前主要的MVINVERSE + PIXEL PERFECT | `Stage1_ver1/main.py` |
+| `Stage1_ver2/` | 舊版 scene reconstruction baseline | `Stage1_ver2/main.py` |
 | `Stage2/` | Mitsuba rendering 與 light optimization | `Stage2/main.py` |
 | `Stage3/` | refinement model 的訓練、推論與多模型比較 | `Stage3/train_channel_ablation.py`, `Stage3/infer_stage3_run.py` |
 | `Stage4/` | 單張影像的 end-to-end relighting wrapper | `Stage4/stage4_relight_single.py` |
